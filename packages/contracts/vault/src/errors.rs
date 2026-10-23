@@ -42,7 +42,8 @@ pub enum ContractError {
     /// `ADPT_SH` (adapter-side shares), not `TOTAL_SH` (vault mUSDC shares),
     /// and the two can desync.
     NoAdapterPosition = 13,
-    /// `migrate_adapter` was called with `max_slippage_bps > 10_000`.
+    /// `migrate_adapter` was called with `max_slippage_bps > 500` (the
+    /// `MAX_ADMIN_SLIPPAGE_BPS` cap).
     InvalidSlippageBps = 14,
     /// `withdraw` was called with a `min_usdc_out` floor and the actual
     /// amount out fell below it. Distinct from `WithdrawalTooSmall` (which
@@ -87,4 +88,10 @@ pub enum ContractError {
     /// Distinct from `Overflow`: this points to a degenerate adapter state
     /// (e.g. zero `total_assets`) rather than a genuine arithmetic overflow.
     DivisionByZero = 24,
+    /// `migrate_adapter` read a zero or negative `total_assets()` from the
+    /// old adapter while the vault still holds adapter shares. That value is
+    /// the baseline for the withdrawal-leg slippage floor; a non-positive
+    /// baseline collapses the floor to zero (or below) so the loss guard
+    /// would always pass.
+    MigrationBaselineInvalid = 25,
 }
